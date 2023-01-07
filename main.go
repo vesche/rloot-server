@@ -76,6 +76,17 @@ func listLibrary(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, getLibraryData(libraryName))
 }
 
+func getMedia(c *gin.Context) {
+	libraryName := c.Param("libraryName")
+	fileName := c.Param("fileName")
+	// TODO: remove test here
+	filePath := fmt.Sprintf("test/%s/%s", libraryName, fileName)
+	if _, err := os.Stat(filePath); err != nil {
+		fmt.Println("foo")
+	}
+	c.File(filePath)
+}
+
 func main() {
 	db, err := gorm.Open(sqlite.Open(DATABASE_PATH), &gorm.Config{})
 	if err != nil {
@@ -116,6 +127,20 @@ func main() {
 
 	// list library (movies, tv, anime, video, books, pictures)
 	router.GET("/list-library/:libraryName", listLibrary)
+
+	// get media file
+	// fs structure
+	// opt/
+	//     rloot/
+	//         movies/
+	//             <media files>
+	//             img/
+	//                 <poster files>
+	//         tv/
+	//             <media files>
+	//             img/
+	//                 <poster files>
+	router.GET("/get-media/:libraryName/:fileName", getMedia)
 
 	router.Run()
 }
