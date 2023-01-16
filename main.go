@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"net/http"
-	"os"
 )
 
 var DATABASE_PATH string = "./rloot.db"
@@ -41,7 +42,7 @@ type tv struct {
 	Director        string `json:"director"`
 }
 
-func getLibraryData(libraryName string) string {
+func getLibraryData(libraryName string) []byte {
 	db, err := gorm.Open(sqlite.Open(DATABASE_PATH), &gorm.Config{})
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -55,25 +56,22 @@ func getLibraryData(libraryName string) string {
 	}
 	if libraryName == "movies" {
 		var movies []movie
-		result := db.Find(&movies)
-		fmt.Println(movies)
-		fmt.Println(result)
+		db.Find(&movies)
 		j, _ := json.Marshal(movies)
-		return string(j)
+		return j
 	} else if libraryName == "tv" {
 		var shows []tv
-		result := db.Find(&shows)
-		fmt.Println(result)
+		db.Find(&shows)
 		j, _ := json.Marshal(shows)
-		return string(j)
+		return j
 	} else {
-		return "{\"error\": \"foo\"}"
+		return []byte(`{"error": "Library not found"}`)
 	}
 }
 
 func listLibrary(c *gin.Context) {
 	libraryName := c.Param("libraryName")
-	c.IndentedJSON(http.StatusOK, getLibraryData(libraryName))
+	c.Data(http.StatusOK, gin.MIMEJSON, getLibraryData(libraryName))
 }
 
 func getMedia(c *gin.Context) {
@@ -115,7 +113,6 @@ func main() {
 		PosterFileName:  "Lost_poster.png",
 		Director:        "Jack Bender",
 	})
-
 	// -----------
 
 	router := gin.Default()
