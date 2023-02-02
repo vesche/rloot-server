@@ -22,24 +22,36 @@ func init() {
 
 type movie struct {
 	gorm.Model
-	Title          string `json:"title"`
-	Year           int    `json:"year"`
-	MediaFileName  string `json:"media_file_name"`
-	PosterFileName string `json:"poster_file_name"`
-	Director       string `json:"director"`
-	TrailerURL     string `json:"trailer_url"`
+	Title         string `json:"title"`
+	Year          int    `json:"year"`
+	Director      string `json:"director"`
+	Cast          string `json:"cast"`
+	TrailerURL    string `json:"trailer_url"`
+	MediaFileName string `json:"media_file_name"`
+	ImageFileName string `json:"image_file_name"`
 }
 
 type tv struct {
 	gorm.Model
-	SeriesTitle     string `json:"series_title"`
-	EpisodeTitle    string `json:"episode_title"`
-	SeasonNumber    int    `json:"season_number"`
-	EpisodeNumber   int    `json:"episode_number"`
-	Year            int    `json:"year"`
-	PrimaryFileName string `json:"primary_file_name"`
-	PosterFileName  string `json:"poster_file_name"`
-	Director        string `json:"director"`
+	SeriesTitle   string `json:"series_title"`
+	EpisodeTitle  string `json:"episode_title"`
+	SeasonNumber  int    `json:"season_number"`
+	EpisodeNumber int    `json:"episode_number"`
+	Year          int    `json:"year"`
+	Director      string `json:"director"`
+	Cast          string `json:"cast"`
+	MediaFileName string `json:"media_file_name"`
+	ImageFileName string `json:"image_file_name"`
+}
+
+type book struct {
+	gorm.Model
+	Title         string `json:"title"`
+	Author        string `json:"author"`
+	Year          int    `json:"year"`
+	Summary       string `json:"summary"`
+	MediaFileName string `json:"media_file_name"`
+	ImageFileName string `json:"image_file_name"`
 }
 
 func getLibraryData(libraryName string) []byte {
@@ -63,6 +75,11 @@ func getLibraryData(libraryName string) []byte {
 		var shows []tv
 		db.Find(&shows)
 		j, _ := json.Marshal(shows)
+		return j
+	} else if libraryName == "books" {
+		var books []book
+		db.Find(&books)
+		j, _ := json.Marshal(books)
 		return j
 	} else {
 		return []byte(`{"error": "Library not found"}`)
@@ -93,25 +110,36 @@ func main() {
 
 	db.AutoMigrate(&movie{})
 	db.AutoMigrate(&tv{})
+	db.AutoMigrate(&book{})
 
 	// example entries
 	db.Create(&movie{
-		Title:          "Gladiator",
-		Year:           2000,
-		MediaFileName:  "Gladiator_2000_1080p.mkv",
-		PosterFileName: "gladiator_poster.png",
-		Director:       "Ridley Scott",
-		TrailerURL:     "https://www.youtube.com/watch?v=uvbavW31adA",
+		Title:         "Gladiator",
+		Year:          2000,
+		Director:      "Ridley Scott",
+		Cast:          "Russell Crowe, Joaquin Phoenix, Connie Nielsen",
+		TrailerURL:    "https://www.youtube.com/watch?v=uvbavW31adA",
+		MediaFileName: "Gladiator_2000_1080p.mkv",
+		ImageFileName: "gladiator_poster.png",
 	})
 	db.Create(&tv{
-		SeriesTitle:     "Lost",
-		EpisodeTitle:    "Man of Science, Man of Faith",
-		SeasonNumber:    2,
-		EpisodeNumber:   1,
-		Year:            2005,
-		PrimaryFileName: "Lost_s02e01_720p.mkv",
-		PosterFileName:  "Lost_poster.png",
-		Director:        "Jack Bender",
+		SeriesTitle:   "Lost",
+		EpisodeTitle:  "Man of Science, Man of Faith",
+		SeasonNumber:  2,
+		EpisodeNumber: 1,
+		Year:          2005,
+		Director:      "Jack Bender",
+		Cast:          "Matthew Fox, Terry O'Quinn, Evangeline Lilly",
+		MediaFileName: "Lost_s02e01_720p.mkv",
+		ImageFileName: "Lost_poster.png",
+	})
+	db.Create(&book{
+		Title:         "Harry Potter and the Sorcerer's Stone",
+		Author:        "J.K. Rowling",
+		Year:          1998,
+		Summary:       "Harry Potter has no idea how famous he is. That's because he's being raised by his miserable aunt and uncle who are terrified Harry will learn that he's really a wizard, just as his parents were. But everything changes when Harry is summoned to attend an infamous school for wizards, and he begins to discover some clues about his illustrious birthright. From the surprising way he is greeted by a lovable giant, to the unique curriculum and colorful faculty at his unusual school, Harry finds himself drawn deep inside a mystical world he never knew existed and closer to his own noble destiny.",
+		MediaFileName: "Harry_Potter_1.pdf",
+		ImageFileName: "Harry_Potter_1_poster.png",
 	})
 	// -----------
 
